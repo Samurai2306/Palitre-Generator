@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <header class="header">
-      <h1>🎨 Генератор цветовых палитр</h1>
+      <h1>Генератор палитр</h1>
     </header>
 
     <main class="main-content">
@@ -25,13 +25,12 @@
         </div>
 
         <button class="btn btn-primary" @click="generatePalette">
-          🎲 Случайная палитра
+          Случайная палитра
         </button>
       </section>
 
       <!-- Заготовленные палитры -->
       <section class="preset-palettes-section">
-        <h2 class="section-title">🎨 Заготовленные палитры</h2>
         <div class="preset-palettes">
           <div
             v-for="(preset, index) in presetPalettes"
@@ -150,6 +149,14 @@
           </div>
         </div>
       </transition>
+
+      <!-- Кнопка портфолио -->
+      <a href="https://samurai2306.github.io/portfolio_project" 
+         target="_blank" 
+         rel="noopener noreferrer" 
+         class="portfolio-link" 
+         aria-label="Портфолио">
+      </a>
 
       <!-- Просмотрщик с mockup -->
       <section class="preview-section">
@@ -768,14 +775,6 @@ onMounted(() => {
   margin-bottom: 40px;
 }
 
-.section-title {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 1.8em;
-  font-weight: 700;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  margin-bottom: 24px;
-}
-
 .preset-palettes {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -1051,11 +1050,6 @@ onMounted(() => {
     padding: 24px;
   }
   
-  .section-title {
-    font-size: 1.5em;
-    margin-bottom: 20px;
-  }
-  
   .preset-palettes {
     grid-template-columns: 1fr;
     gap: 15px;
@@ -1169,10 +1163,6 @@ onMounted(() => {
   
   .color-value {
     font-size: 12px;
-  }
-  
-  .section-title {
-    font-size: 1.3em;
   }
   
   .preview-section {
@@ -1456,6 +1446,72 @@ onMounted(() => {
 
 .modal-enter-to .modal-content, .modal-leave-from .modal-content {
   transform: scale(1) translateY(0);
+}
+
+/* Кнопка портфолио */
+.portfolio-link {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: block;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  overflow: hidden;
+  border: 2px solid rgba(184, 165, 255, 0.3);
+  background-image: url('https://drive.google.com/thumbnail?id=1e-zV7dZKgUXv96QRAvwxcUrQ7ADRSGei&sz=w200');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 1000;
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.portfolio-link:hover {
+  transform: scale(1.1);
+  border-color: rgba(184, 165, 255, 0.6);
+  filter: brightness(1.2);
+  box-shadow: 
+    0 6px 30px rgba(184, 165, 255, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.portfolio-link:active {
+  transform: scale(0.95);
+}
+
+@media (max-width: 768px) {
+  .portfolio-link {
+    width: 45px;
+    height: 45px;
+    bottom: 20px;
+    right: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .portfolio-link {
+    width: 40px;
+    height: 40px;
+    bottom: 15px;
+    right: 15px;
+  }
+}
+
+@media (max-width: 375px) {
+  .portfolio-link {
+    width: 36px;
+    height: 36px;
+    bottom: 15px;
+    right: 15px;
+  }
 }
 </style>
 
