@@ -64,7 +64,11 @@
             @click="copyToClipboard(color, index)"
           >
             <div class="color-info">
-              <span class="color-value">{{ formatColor(color) }}</span>
+              <div class="color-text-info">
+                <span class="color-value">{{ formatColor(color) }}</span>
+                <span v-if="colorNames[index]" class="color-name">{{ colorNames[index] }}</span>
+                <span v-else-if="loadingNames[index]" class="color-name loading">Загрузка...</span>
+              </div>
               <div class="color-actions">
                 <button
                   class="edit-btn"
@@ -201,6 +205,8 @@ const isDarkTheme = ref(false)
 const editingColorIndex = ref(null)
 const editingColor = ref('#000000')
 const editingHsl = ref({ h: 0, s: 0, l: 0 })
+const colorNames = ref({})
+const loadingNames = ref({})
 
 // Заготовленные палитры
 const presetPalettes = ref([
@@ -282,6 +288,8 @@ const generatePalette = () => {
   
   palette.value = newPalette
   saveToLocalStorage()
+  // Загружаем названия цветов для новой палитры
+  loadColorNames()
 }
 
 // Конвертация HSL в HEX
@@ -413,12 +421,57 @@ const updateColorFromHsl = () => {
 }
 
 // Применение изменений цвета
-const applyColorEdit = () => {
+const applyColorEdit = async () => {
   if (editingColorIndex.value !== null) {
     palette.value[editingColorIndex.value] = editingColor.value
     saveToLocalStorage()
     closeColorEditor()
+    // Загружаем новое название для измененного цвета
+    await getColorName(editingColor.value, editingColorIndex.value)
   }
+}
+
+// Получение названия цвета через API
+const getColorName = async (hexColor, index) => {
+  try {
+    loadingNames.value[index] = true
+    // Убираем # из начала HEX кода
+    const hexWithoutHash = hexColor.replace('#', '')
+    
+    const response = await fetch(`https://www.thecolorapi.com/id?hex=${hexWithoutHash}`)
+    
+    if (!response.ok) {
+      throw new Error('Ошибка при получении названия цвета')
+    }
+    
+    const data = await response.json()
+    const colorName = data.name?.value || 'Неизвестный цвет'
+    
+    // Сохраняем название цвета
+    colorNames.value[index] = colorName
+    loadingNames.value[index] = false
+    
+    return colorName
+  } catch (error) {
+    console.error('Ошибка при получении названия цвета:', error)
+    loadingNames.value[index] = false
+    colorNames.value[index] = null
+    return null
+  }
+}
+
+// Загрузка названий для всех цветов в палитре
+const loadColorNames = async () => {
+  // Очищаем предыдущие названия
+  colorNames.value = {}
+  loadingNames.value = {}
+  
+  // Загружаем названия для каждого цвета параллельно
+  const promises = palette.value.map((color, index) => 
+    getColorName(color, index)
+  )
+  
+  await Promise.all(promises)
 }
 
 // Загрузка заготовленной палитры
@@ -427,6 +480,8 @@ const loadPresetPalette = (colors) => {
   colorCount.value = colors.length
   pinnedColors.value = []
   saveToLocalStorage()
+  // Загружаем названия цветов для заготовленной палитры
+  loadColorNames()
 }
 
 // Отслеживание изменений формата
@@ -435,10 +490,13 @@ watch(colorFormat, () => {
 })
 
 // Инициализация
-onMounted(() => {
+onMounted(async () => {
   loadFromLocalStorage()
   if (palette.value.length === 0) {
     generatePalette()
+  } else {
+    // Загружаем названия для существующей палитры
+    await loadColorNames()
   }
 })
 </script>
@@ -662,6 +720,14 @@ onMounted(() => {
   z-index: 1;
 }
 
+.color-text-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
 .color-actions {
   display: flex;
   gap: 8px;
@@ -704,6 +770,31 @@ onMounted(() => {
   font-family: 'Courier New', monospace;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   letter-spacing: 0.5px;
+}
+
+.color-name {
+  font-weight: 500;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  font-style: italic;
+  text-transform: capitalize;
+  opacity: 0.9;
+}
+
+.color-name.loading {
+  font-style: normal;
+  opacity: 0.7;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 
 .pin-btn {
